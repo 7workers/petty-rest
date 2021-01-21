@@ -1,6 +1,8 @@
 <?php
+/** @noinspection PhpUnhandledExceptionInspection */
+/** @noinspection PhpInconsistentReturnPointsInspection */
+/** @noinspection PhpFullyQualifiedNameUsageInspection */
 /** @noinspection PhpMissingReturnTypeInspection */
-/** @noinspection PhpUnused */
 /** @noinspection PhpToStringReturnInspection */
 /** @noinspection ReturnTypeCanBeDeclaredInspection */
 namespace PettyRest;
@@ -9,7 +11,6 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
-use Throwable;
 
 class Client implements ClientInterface
 {
@@ -102,14 +103,14 @@ class Client implements ClientInterface
                 public function withStatus($code,$reasonPhrase=''){return $this;}
                 public function getReasonPhrase(){return '';}};
 
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->throwError($e);
         }
     }
 
     protected function throwError($e)
     {
-        if( $e instanceof Throwable )   throw new ApiException($e->getMessage(), $e->getCode(), $e);
+        if( $e instanceof \Throwable )   throw new ApiException($e->getMessage(), $e->getCode(), $e);
         throw new ApiException($e);
     }
 }

@@ -1,9 +1,10 @@
-<?php /** @noinspection PhpDocRedundantThrowsInspection */
+<?php
+/** @noinspection PhpFullyQualifiedNameUsageInspection */
 
+/** @noinspection PhpUnhandledExceptionInspection */ /** @noinspection PhpInconsistentReturnPointsInspection */ /** @noinspection ReturnTypeCanBeDeclaredInspection */ /** @noinspection PhpDocRedundantThrowsInspection */
 namespace PettyRest;
 
 use Psr\Http\Message\ResponseInterface;
-use Throwable;
 
 class Response
 {
@@ -16,13 +17,14 @@ class Response
     public static function fromServerResponse(ResponseInterface $response): self
     {
         try {
+            $body = $response->getBody()->getContents();
 
-            $d = @json_decode($response->getBody()->getContents(), true);
+            $d = @json_decode($body, true);
 
             if (!empty($d['error'])) {
                 $error = $d['error'];
             } elseif (!is_array($d)) {
-                $error = 'Error decoding server response '.json_last_error_msg();
+                $error = 'Error decoding server response. JSON Error:'.json_last_error_msg()." BODY:\n".$body;
             }
 
             if( isset($error) ) static::throwError($error);
@@ -33,12 +35,12 @@ class Response
 
             return $rsp;
 
-        } catch (Throwable $e ) { static::throwError($e); }
+        } catch (\Throwable $e ) { static::throwError($e); }
     }
 
     protected static function throwError($e)
     {
-        if( $e instanceof Throwable )   throw new ApiException($e->getMessage(), $e->getCode(), $e);
+        if( $e instanceof \Throwable ) throw new ApiException($e->getMessage(), $e->getCode(), $e);
         throw new ApiException($e);
     }
 }

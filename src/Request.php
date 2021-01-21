@@ -1,9 +1,4 @@
-<?php
-/** @noinspection PhpToStringReturnInspection */
-/** @noinspection PhpMissingReturnTypeInspection */
-/** @noinspection PhpDocRedundantThrowsInspection */
-/** @noinspection ReturnTypeCanBeDeclaredInspection */
-
+<?php /** @noinspection DuplicatedCode */ /** @noinspection PhpToStringReturnInspection */ /** @noinspection PhpMissingReturnTypeInspection */ /** @noinspection PhpDocRedundantThrowsInspection */ /** @noinspection ReturnTypeCanBeDeclaredInspection */
 namespace PettyRest;
 
 use Psr\Http\Message\RequestInterface;
@@ -50,6 +45,7 @@ class Request implements RequestInterface
     public function withProtocolVersion($version){return $this;}
     public function getBody()
     {
+        if( null === $this->bodyJson ) $this->bodyJson=json_encode(array_filter(array_map(static function($in){if(!is_array($in))return $in;if(empty($in))return null;$in=array_filter($in,static function($x){if(null===$x)return false;if(is_array($x)&&empty($x))return false;return true;});if(empty($in))return null;return $in;},get_object_vars($this)),static function($x){return null!==$x;}),JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
         return new class($this->bodyJson) implements StreamInterface{
             private $json;
             public function __construct($json){$this->json=$json;}
@@ -73,7 +69,7 @@ class Request implements RequestInterface
     {
         return new class($this->host,$this->target,$this->scheme) implements UriInterface{
             private $h;private $p;private $s;
-            public function __construct($h,$p,$s){$this->h =$h;$this->p =$p;$this->s =$s;}
+            public function __construct($h,$p,$s){$this->h=$h;$this->p=$p;$this->s=$s;}
             public function getScheme(){return $this->s;}
             public function getHost(){return $this->h;}
             public function getPath(){return $this->p;}

@@ -1,0 +1,1 @@
+<?php namespace PettyRest; use Exception; class ApiException extends Exception {}

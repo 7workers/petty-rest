@@ -1,6 +1,5 @@
 <?php
 /** @noinspection PhpFullyQualifiedNameUsageInspection */
-
 /** @noinspection PhpUnhandledExceptionInspection */ /** @noinspection PhpInconsistentReturnPointsInspection */ /** @noinspection ReturnTypeCanBeDeclaredInspection */ /** @noinspection PhpDocRedundantThrowsInspection */
 namespace PettyRest;
 

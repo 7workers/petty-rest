@@ -1,10 +1,8 @@
 <?php /** @noinspection DuplicatedCode */ /** @noinspection PhpToStringReturnInspection */ /** @noinspection PhpMissingReturnTypeInspection */ /** @noinspection PhpDocRedundantThrowsInspection */ /** @noinspection ReturnTypeCanBeDeclaredInspection */
 namespace PettyRest;
-
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
-
 class Request implements RequestInterface
 {
     protected $method = 'POST';
@@ -18,9 +16,7 @@ class Request implements RequestInterface
     {
         $this->target = $target;
 
-        $this->arHeaders = [
-            'Content-Type' => ['application/json'],
-        ];
+        $this->arHeaders = ['Content-Type'=>['application/json']];
 
         if(is_object($objData)) $this->bodyJson=json_encode(array_filter(array_map(static function($in){if(!is_array($in))return $in;if(empty($in))return null;$in=array_filter($in,static function($x){if(null===$x)return false;if(is_array($x)&&empty($x))return false;return true;});if(empty($in))return null;return $in;},get_object_vars($objData)),static function($x){return null!==$x;}),JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
     }

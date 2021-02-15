@@ -6,20 +6,18 @@
 /** @noinspection PhpToStringReturnInspection */
 /** @noinspection ReturnTypeCanBeDeclaredInspection */
 namespace PettyRest;
-
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
-
 class Client implements ClientInterface
 {
-    public $timeout = 5;
+    public $timeout = 1;
     public $forceScheme;
 
     protected $host;
     protected $apiKey;
-    protected $targetPrefix = '/201';
+    protected $targetPrefix;
 
     public function __construct(string $host, string $apiKey)
     {
@@ -40,14 +38,12 @@ class Client implements ClientInterface
             $request = $request->withHeader('Authorization', 'Bearer '.$this->apiKey);
             $request->setApiServerHost($this->host);
 
-            if (null !== $this->forceScheme) $request->setApiServerScheme($this->forceScheme);
-            if (null !== $this->targetPrefix) $request->setTargetPrefix($this->targetPrefix);
+            if (null!==$this->forceScheme) $request->setApiServerScheme($this->forceScheme);
+            if (null!==$this->targetPrefix) $request->setTargetPrefix($this->targetPrefix);
 
-            $arHeaders_send = [];
+            $arHeaders_send=[];
 
-            foreach ($request->getHeaders() as $name => $values) {
-                $arHeaders_send[] = $name . ': ' . implode(', ', $values);
-            }
+            foreach ($request->getHeaders() as $name=>$values){$arHeaders_send[]=$name.': '.implode(', ',$values);}
 
             $ch = curl_init();
 
@@ -65,7 +61,7 @@ class Client implements ClientInterface
 
             curl_close($ch);
 
-            if ( !empty($error)) $this->throwError($error);
+            if(!empty($error)) $this->throwError($error);
 
             return new class($rawResponse) implements ResponseInterface {
                 public $rawResponse;
@@ -102,15 +98,12 @@ class Client implements ClientInterface
                 public function getStatusCode(){return 202;}
                 public function withStatus($code,$reasonPhrase=''){return $this;}
                 public function getReasonPhrase(){return '';}};
-
-        } catch (\Throwable $e) {
-            $this->throwError($e);
-        }
+        }catch(\Throwable $e){$this->throwError($e);}
     }
 
     protected function throwError($e)
     {
-        if( $e instanceof \Throwable )   throw new ApiException($e->getMessage(), $e->getCode(), $e);
+        if( $e instanceof \Throwable ) throw new ApiException($e->getMessage(),$e->getCode(),$e);
         throw new ApiException($e);
     }
 }

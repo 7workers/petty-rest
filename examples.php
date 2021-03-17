@@ -1,20 +1,18 @@
-<?php
-/** @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
-
-/** @noinspection PhpFullyQualifiedNameUsageInspection */
+<?php /** @noinspection PhpUnnecessaryFullyQualifiedNameInspection */ /** @noinspection PhpFullyQualifiedNameUsageInspection */
 
 namespace MyNameSpace;
 
 use PettyRest\ApiException;
+use PettyRest\Client;
+use PettyRest\Request;
+use PettyRest\Response;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
-require __DIR__.'/../shared/vendor/autoload.php';
 require 'src/Client.php';
 require 'src/ApiException.php';
 require 'src/Request.php';
 require 'src/Response.php';
-
-$c = new \PettyRest\Client('api.pmt', 'API_KEY');
-$c->forceScheme = 'http';
 
 class MyApiError extends \PettyRest\ApiException {}
 
@@ -33,6 +31,10 @@ class MyApiRequest extends \PettyRest\Request
         parent::__construct('/api-method-a/');
     }
 
+    public function getResponseDummy(): Response
+    {
+        return new MyRequestResult();
+    }
 }
 
 class MyRequestResult extends \PettyRest\Response
@@ -42,28 +44,58 @@ class MyRequestResult extends \PettyRest\Response
         'field2' => null,
     ];
 
-    /**
-     * @param $e
-     * @throws MyApiError
-     */
-    protected static function throwError($e):void
+    protected function getExceptionObject($stringOrException): \Throwable
     {
-        if( $e instanceof \Throwable )   throw new MyApiError($e->getMessage(), $e->getCode(), $e);
-        throw new MyApiError($e);
+        if( $stringOrException instanceof \Throwable ) return new MyApiError($stringOrException->getMessage(),$stringOrException->getCode(),$stringOrException);
+        return new MyApiError($stringOrException);
     }
 }
+
+class MyClient extends Client
+{
+    /**
+     * @param $stringOrException
+     * @return MyApiError
+     */
+    protected function getExceptionObject($stringOrException):\Throwable
+    {
+        if( $stringOrException instanceof \Throwable ) return new MyApiError($stringOrException->getMessage(),$stringOrException->getCode(),$stringOrException);
+        return  new MyApiError($stringOrException);
+    }
+
+    /**
+     * @param RequestInterface $request
+     * @return ResponseInterface|MyRequestResult
+     * @throws MyApiError|\Throwable
+     */
+    public function sendRequest(RequestInterface $request): ResponseInterface
+    {
+        if( $request instanceof MyApiRequest )      return $this->sendRealRequest($request);
+        if( $request instanceof  Request )          return $this->sendRealRequest($request);
+
+        throw $this->getExceptionObject('unknown request class: ' . get_class($request));
+    }
+}
+
+$c = new MyClient('api.pmt', 'API_KEY');
+$c->forceScheme = 'http';
 
 $r = new MyApiRequest();
 $r->event = 'SOME_EVENT';
 $r->data['name'] = 'my name';
 
 try {
-    $r = MyRequestResult::fromServerResponse($c->sendRequest($r));
+    $result = $c->sendRequest($r);
+
+    echo($result->returnData['field1']);
+    //$r = MyRequestResult::fromServerResponse($c->sendRequest($r));
 } catch (ApiException $e) {
     // error
+} catch (\Throwable $e) {
+
 }
 
-echo($r->returnData['field1']);
+echo($result->returnData['field1']);
 
 // example 2
 
@@ -73,6 +105,17 @@ $r2 = new class() extends \PettyRest\Request {
         'field1' => 'value',
         'field2' => 'value',
     ];
+
+    public function getResponseDummy(): Response
+    {
+        return new class() extends Response{
+            protected function getExceptionObject($stringOrException): \Throwable
+            {
+                if( $stringOrException instanceof \Throwable ) throw new ApiException($stringOrException->getMessage(),$stringOrException->getCode(),$stringOrException);
+                throw new ApiException($stringOrException);
+            }
+        };
+    }
 };
 
-$c->sendRequest($r2);
+//

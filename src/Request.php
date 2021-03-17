@@ -3,7 +3,7 @@ namespace PettyRest;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
-class Request implements RequestInterface
+abstract class Request implements RequestInterface
 {
     protected $method = 'POST';
     protected $scheme = 'https';
@@ -11,6 +11,8 @@ class Request implements RequestInterface
     protected $host;
     protected $arHeaders;
     protected $bodyJson;
+
+    abstract public function getResponseDummy(): Response;
 
     public function __construct( string $target, $objData=null )
     {
@@ -83,4 +85,6 @@ class Request implements RequestInterface
             public function withQuery($query){return $this;}
             public function withFragment($fragment){return $this;}};
     }
+
+
 }

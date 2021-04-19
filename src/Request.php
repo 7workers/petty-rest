@@ -9,8 +9,8 @@ abstract class Request implements RequestInterface
     protected $scheme = 'https';
     protected $target;
     protected $host;
-    protected $arHeaders;
     protected $bodyJson;
+    protected $arHeaders;
 
     abstract public function getResponseDummy(): Response;
 
@@ -85,6 +85,4 @@ abstract class Request implements RequestInterface
             public function withQuery($query){return $this;}
             public function withFragment($fragment){return $this;}};
     }
-
-
 }

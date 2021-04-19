@@ -6,30 +6,23 @@ use Psr\Http\Message\StreamInterface;
 
 abstract class Response implements ResponseInterface
 {
-    abstract protected function getExceptionObject($stringOrException):\Throwable;
-
     public $rawResponse;
 
     public function hydrateFromRaw(string $rawResponse)
     {
-        try {
-            $this->rawResponse = $rawResponse;
+        $this->rawResponse = $rawResponse;
 
-            $d = @json_decode($rawResponse, true);
+        $d = @json_decode($rawResponse, true);
 
-            if (!empty($d['error'])) {
-                $error = $d['error'];
-            } elseif (!is_array($d)) {
-                $error = 'Error decoding server response. JSON Error:' . json_last_error_msg() . " BODY:\n" . $rawResponse;
-            }
-
-            if (isset($error)) throw $this->getExceptionObject($error);
-
-            foreach($d as $k=>$v){$this->{$k}=$v;}
-
-        } catch (\Throwable $e) {
-            throw $this->getExceptionObject($e);
+        if (!empty($d['error'])) {
+            $error = $d['error'];
+        } elseif (!is_array($d)) {
+            $error = 'Error decoding server response. JSON Error:' . json_last_error_msg() . " BODY:\n" . $rawResponse;
         }
+
+        if (isset($error)) throw new ApiException($error);
+
+        foreach($d as $k=>$v){$this->{$k}=$v;}
     }
 
     public function getProtocolVersion(){return '1.1';}
@@ -45,7 +38,6 @@ abstract class Response implements ResponseInterface
         return new class($this) implements StreamInterface {
             private $response;
             public function __construct($response){$this->response=$response;}
-            /** @noinspection PhpToStringReturnInspection */
             public function __toString(){return $this->getContents();}
             public function close(){}
             public function detach(){}

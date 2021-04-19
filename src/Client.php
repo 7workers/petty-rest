@@ -12,12 +12,7 @@ use Psr\Http\Message\ResponseInterface;
 
 abstract class Client implements ClientInterface
 {
-    /**
-     * @param $stringOrException
-     * @see Client::getExceptionObject__dummy()
-     */
-    abstract protected function getExceptionObject($stringOrException):\Throwable;
-    abstract public function sendRequest(RequestInterface $request): ResponseInterface;
+    abstract protected function getExceptionClass(\Throwable $e):string;
 
     public $timeout = 1;
     public $forceScheme;
@@ -32,19 +27,23 @@ abstract class Client implements ClientInterface
         $this->apiKey = $apiKey;
     }
 
+    public function sendRequest(RequestInterface $request): ResponseInterface
+    {
+        /** @noinspection PhpParamsInspection */
+        return $this->sendRealRequest($request);
+    }
+
     public function sendRealRequest( Request $request ): Response
     {
         try {
-            /** @var Request $request */
-            $request = $request->withHeader('Authorization', 'Bearer '.$this->apiKey);
             $request->setApiServerHost($this->host);
 
-            if (null!==$this->forceScheme) $request->setApiServerScheme($this->forceScheme);
+            if (null!==$this->forceScheme)  $request->setApiServerScheme($this->forceScheme);
             if (null!==$this->targetPrefix) $request->setTargetPrefix($this->targetPrefix);
 
-            $arHeaders_send=[];
+            $arHeaders_send = ['Authorization: Bearer '.$this->apiKey];
 
-            foreach ($request->getHeaders() as $name=>$values){$arHeaders_send[]=$name.': '.implode(', ',$values);}
+            foreach($request->getHeaders() as $name=>$values){$arHeaders_send[]=$name.': '.implode(', ',$values);}
 
             $ch = curl_init();
 
@@ -62,19 +61,19 @@ abstract class Client implements ClientInterface
 
             curl_close($ch);
 
-            if(!empty($error)) throw $this->getExceptionObject($error);
+            if(!empty($error))$this->throwException(new ApiException($error));
 
             $responseObject = $request->getResponseDummy();
             $responseObject->hydrateFromRaw($rawResponse);
 
             return $responseObject;
 
-        }catch(\Throwable $e){throw $this->getExceptionObject($e);}
+        }catch(\Throwable $e){$this->throwException($e);}
     }
 
-    private function getExceptionObject__dummy($stringOrException): \Throwable
+    protected function throwException(\Throwable $e)
     {
-        if( $stringOrException instanceof \Throwable ) return new ApiException($stringOrException->getMessage(),$stringOrException->getCode(),$stringOrException);
-        return new ApiException($stringOrException);
+        $class = $this->getExceptionClass($e);
+        throw new $class($e->getMessage(), $e->getCode(),$e);
     }
 }

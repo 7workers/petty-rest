@@ -54,7 +54,7 @@ abstract class Client implements ClientInterface
             curl_setopt($ch, CURLOPT_POST,              true);
             curl_setopt($ch, CURLOPT_TIMEOUT,           $this->timeout);
             curl_setopt($ch, CURLOPT_HTTPHEADER,        $arHeaders_send);
-            curl_setopt($ch, CURLOPT_POSTFIELDS,        $request->getBody()->getContents() );
+            curl_setopt($ch, CURLOPT_POSTFIELDS,        $request->getBody()->getContents());
 
             $rawResponse = @curl_exec($ch);
             $error       = curl_error($ch);

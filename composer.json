@@ -1,10 +1,9 @@
 {
   "name": "7workers/petty-rest",
-  "description": "Limited and basic REST client",
-  "minimum-stability": "dev",
-  "version": "2.0.4",
-  "type": "project",
-  "license": "proprietary",
+  "description": "Limited and very basic REST client",
+  "version": "2.0.5",
+  "type": "library",
+  "license": "MIT",
   "authors": [
     {
       "name": "Max Deshkevich",

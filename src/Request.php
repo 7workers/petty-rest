@@ -43,7 +43,7 @@ abstract class Request implements RequestInterface
     public function withProtocolVersion($version){return $this;}
     public function getBody()
     {
-        if( null === $this->bodyJson ) $this->bodyJson=json_encode(array_filter(array_map(static function($in){if(!is_array($in))return $in;if(empty($in))return null;$in=array_filter($in,static function($x){if(null===$x)return false;if(is_array($x)&&empty($x))return false;return true;});if(empty($in))return null;return $in;},get_object_vars($this)),static function($x){return null!==$x;}),JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+        if(null===$this->bodyJson)$this->bodyJson=json_encode(array_filter(array_map(static function($in){if(!is_array($in))return $in;if(empty($in))return null;$in=array_filter($in,static function($x){if(null===$x)return false;if(is_array($x)&&empty($x))return false;return true;});if(empty($in))return null;return $in;},array_filter(get_object_vars($this),static function($k){return !in_array($k,['method','scheme','arHeaders','host','target','bodyJson']);},ARRAY_FILTER_USE_KEY)),static function($x){return null!==$x;}),JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
         return new class($this->bodyJson) implements StreamInterface{
             private $json;
             public function __construct($json){$this->json=$json;}

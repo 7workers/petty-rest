@@ -5,11 +5,11 @@ namespace SomeonesNameSpace;
 use MyNameSpace\MyClient;
 use PettyRest\ApiException;
 
-require 'src/Client.php';
-require 'src/ApiException.php';
-require 'src/Request.php';
-require 'src/Response.php';
-require 'create_your_lib_example.php';
+require '../src/Client.php';
+require '../src/ApiException.php';
+require '../src/Request.php';
+require '../src/Response.php';
+require '../create_your_lib_example.php';
 
 $c = new \MyNameSpace\MyClient('api.server', 'API_KEY');
 $c->forceScheme = 'http';

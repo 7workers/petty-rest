@@ -18,19 +18,11 @@ abstract class Client implements ClientInterface
     public $forceScheme;
 
     protected $host;
-    protected $port;
     protected $apiKey;
     protected $targetPrefix;
 
     public function __construct(string $host, string $apiKey)
     {
-        $portColon = strpos($host, ':');
-
-        if ($portColon !== false) {
-            $this->port = (int)substr($host, $portColon + 1);
-            $host = substr($host, 0, $portColon);
-        }
-
         $this->host   = $host;
         $this->apiKey = $apiKey;
     }
@@ -56,7 +48,6 @@ abstract class Client implements ClientInterface
             $ch = curl_init();
 
             curl_setopt($ch, CURLOPT_URL,               (string)$request->getUri());
-            if( null!==$this->port ) curl_setopt($ch, CURLOPT_POST, $this->port);
             curl_setopt($ch, CURLOPT_HEADER,            0);
             curl_setopt($ch, CURLOPT_VERBOSE,           0);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER,    true);

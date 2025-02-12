@@ -1,14 +1,15 @@
 <?php /** @noinspection PhpMissingReturnTypeInspection */ /** @noinspection PhpFullyQualifiedNameUsageInspection */ /** @noinspection PhpUnhandledExceptionInspection */ /** @noinspection PhpInconsistentReturnPointsInspection */ /** @noinspection ReturnTypeCanBeDeclaredInspection */ /** @noinspection PhpDocRedundantThrowsInspection */
 namespace PettyRest;
 
+use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 abstract class Response implements ResponseInterface
 {
-    public $rawResponse;
+    public string $rawResponse;
 
-    public function hydrateFromRaw(string $rawResponse)
+    public function hydrateFromRaw(string $rawResponse): void
     {
         $this->rawResponse = $rawResponse;
 
@@ -25,36 +26,36 @@ abstract class Response implements ResponseInterface
         foreach($d as $k=>$v){$this->{$k}=$v;}
     }
 
-    public function getProtocolVersion(){return '1.1';}
-    public function withProtocolVersion($version){return $this;}
-    public function getHeaders(){return [];}
-    public function hasHeader($name){return false;}
-    public function getHeader($name){return [];}
-    public function getHeaderLine($name){return '';}
-    public function withHeader($name,$value){return $this;}
-    public function withAddedHeader($name,$value){return $this;}
-    public function withoutHeader($name){return $this;}
-    public function getBody() {
+    public function getProtocolVersion(): string {return '1.1';}
+    public function withProtocolVersion(string $version): MessageInterface {return $this;}
+    public function getHeaders(): array {return [];}
+    public function hasHeader(string $name): bool {return false;}
+    public function getHeader(string $name): array {return [];}
+    public function getHeaderLine(string $name): string {return '';}
+    public function withHeader(string $name,$value): MessageInterface {return $this;}
+    public function withAddedHeader(string $name,$value): MessageInterface {return $this;}
+    public function withoutHeader(string $name): MessageInterface {return $this;}
+    public function getBody(): StreamInterface {
         return new class($this) implements StreamInterface {
             private $response;
             public function __construct($response){$this->response=$response;}
-            public function __toString(){return $this->getContents();}
-            public function close(){}
+            public function __toString(): string {return $this->getContents();}
+            public function close(): void {}
             public function detach(){}
-            public function getSize(){return null;}
-            public function tell(){return 0;}
-            public function eof(){return false;}
-            public function isSeekable(){return false;}
-            public function seek($offset,$whence=SEEK_SET){}
-            public function rewind(){}
-            public function isWritable(){return false;}
-            public function write($string){}
-            public function isReadable(){return false;}
-            public function read($length){}
-            public function getContents(){return @$this->response->rawResponse;}
-            public function getMetadata($key=null){return null;}};}
-    public function withBody(StreamInterface $body){return $this;}
-    public function getStatusCode(){return 202;}
-    public function withStatus($code,$reasonPhrase=''){return $this;}
-    public function getReasonPhrase(){return '';}
+            public function getSize(): ?int {return null;}
+            public function tell(): int {return 0;}
+            public function eof(): bool {return false;}
+            public function isSeekable(): bool {return false;}
+            public function seek(int $offset,int $whence=SEEK_SET): void {}
+            public function rewind(): void {}
+            public function isWritable(): bool {return false;}
+            public function write(string $string): int {return 0;}
+            public function isReadable():bool {return false;}
+            public function read(int $length): string {return '';}
+            public function getContents(): string {return @$this->response->rawResponse;}
+            public function getMetadata(?string $key=null){return null;}};}
+    public function withBody(StreamInterface $body): MessageInterface {return $this;}
+    public function getStatusCode(): int {return 202;}
+    public function withStatus(int $code, string $reasonPhrase=''): ResponseInterface {return $this;}
+    public function getReasonPhrase(): string {return '';}
 }

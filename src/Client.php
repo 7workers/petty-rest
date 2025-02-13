@@ -14,12 +14,12 @@ abstract class Client implements ClientInterface
 {
     abstract protected function getExceptionClass(\Throwable $e):string;
 
-    public $timeout = 1;
-    public $forceScheme;
+    public int $timeout = 1;
+    public ?string $forceScheme = null;
 
-    protected $host;
-    protected $apiKey;
-    protected $targetPrefix;
+    protected string $host;
+    protected string $apiKey;
+    protected ?string $targetPrefix = null;
 
     public function __construct(string $host, string $apiKey)
     {

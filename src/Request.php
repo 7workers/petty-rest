@@ -10,7 +10,7 @@ abstract class Request implements RequestInterface
     protected string $scheme = 'https';
     protected string $target;
     protected string $host;
-    protected string $bodyJson;
+    protected ?string $bodyJson = null;
     protected array $arHeaders;
 
     abstract public function getResponseDummy(): Response;

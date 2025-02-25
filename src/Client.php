@@ -58,10 +58,11 @@ abstract class Client implements ClientInterface
 
             $rawResponse = @curl_exec($ch);
             $error       = curl_error($ch);
+            $error_code  = curl_errno($ch);
 
             curl_close($ch);
 
-            if(!empty($error))$this->throwException(new ApiException($error));
+            if(!empty($error))$this->throwException(new ApiException($error, $error_code));
 
             $responseObject = $request->getResponseDummy();
             $responseObject->hydrateFromRaw($rawResponse);

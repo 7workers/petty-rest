@@ -13,15 +13,17 @@ abstract class Response implements ResponseInterface
     {
         $this->rawResponse = $rawResponse;
 
-        $d = @json_decode($rawResponse, true);
+        try {
+            $d = json_decode($rawResponse, true, 512, JSON_THROW_ON_ERROR);
 
-        if (!empty($d['error'])) {
-            $error = $d['error'];
-        } elseif (!is_array($d)) {
-            $error = 'Error decoding server response. JSON Error:' . json_last_error_msg() . " BODY:\n" . $rawResponse;
+            if (!empty($d['error'])) {
+                throw new ApiException($d['error'], $d['code'] ?? 0);
+            }
         }
-
-        if (isset($error)) throw new ApiException($error);
+        catch (\JsonException $e) {
+            throw new ApiException('Error decoding server response. JSON Error:' .
+                $e->getMessage() . " BODY:\n" . $rawResponse);
+        }
 
         foreach($d as $k=>$v){$this->{$k}=$v;}
     }
